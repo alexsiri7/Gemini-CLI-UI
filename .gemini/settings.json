@@ -1,18 +1,13 @@
 {
   "mcpServers": {
     "word-coach-annie": {
-      "command": "docker",
+      "command": "/app/word-coach-annie/node_modules/.bin/tsx",
       "args": [
-        "compose",
-        "exec",
-        "-T",
-        "app",
-        "npx",
-        "tsx",
-        "src/mcp/index.ts",
-        "--cwd",
-        "/home/asiri/claude-playground/word-coach-annie"
-      ]
+        "/app/word-coach-annie/src/mcp/index.ts"
+      ],
+      "env": {
+        "DATABASE_URL": "file:/app/word-coach-annie/data/word-coach-annie.db"
+      }
     }
   }
 }

@@ -199,21 +199,13 @@ async function spawnGemini(command, options = {}, ws) {
     const geminiPath = process.env.GEMINI_PATH || '/usr/local/bin/gemini';
     // console.log('Full command:', geminiPath, args.join(' '));
     
-    // Properly escape arguments for shell
-    const escapedArgs = args.map(arg => {
-      if (typeof arg !== 'string') return arg;
-      // Wrap in single quotes and escape existing single quotes
-      return "'" + arg.replace(/'/g, "'\\''") + "'";
-    });
+    // Standard spawn without shell is more reliable
+    console.log('🚀 Spawning Gemini process (standard):', geminiPath, JSON.stringify(args));
     
-    const fullCommand = `"${geminiPath}" ${escapedArgs.join(' ')}`;
-    console.log('🚀 Executing Gemini command:', fullCommand);
-    
-    const geminiProcess = spawn(fullCommand, [], {
+    const geminiProcess = spawn(geminiPath, args, {
       cwd: workingDir,
       stdio: ['pipe', 'pipe', 'pipe'],
-      env: { ...process.env }, // Inherit all environment variables
-      shell: '/bin/bash'
+      env: { ...process.env } // Inherit all environment variables
     });
     
     // Attach temp file info to process for cleanup later
