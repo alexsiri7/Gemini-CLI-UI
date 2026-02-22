@@ -207,7 +207,7 @@ async function spawnGemini(command, options = {}, ws) {
     });
     
     const fullCommand = `"${geminiPath}" ${escapedArgs.join(' ')}`;
-    // console.log('Full command string:', fullCommand);
+    console.log('🚀 Executing Gemini command:', fullCommand);
     
     const geminiProcess = spawn(fullCommand, [], {
       cwd: workingDir,
@@ -233,14 +233,16 @@ async function spawnGemini(command, options = {}, ws) {
     
     // Add timeout handler
     let hasReceivedOutput = false;
-    const timeoutMs = 30000; // 30 seconds
+    const timeoutMs = 300000; // 5 minutes (increased from 30s)
     const timeout = setTimeout(() => {
       if (!hasReceivedOutput) {
-        // console.error('⏰ Gemini CLI timeout - no output received after', timeoutMs, 'ms');
-        ws.send(JSON.stringify({
-          type: 'gemini-error',
-          error: 'Gemini CLI timeout - no response received'
-        }));
+        console.error('⏰ Gemini CLI timeout - no output received after', timeoutMs, 'ms');
+        if (ws) {
+          ws.send(JSON.stringify({
+            type: 'gemini-error',
+            error: 'Gemini CLI timeout - no response received'
+          }));
+        }
         geminiProcess.kill('SIGTERM');
       }
     }, timeoutMs);
@@ -265,6 +267,7 @@ async function spawnGemini(command, options = {}, ws) {
     
     geminiProcess.stdout.on('data', (data) => {
       const rawOutput = data.toString();
+      console.log('📥 Gemini stdout received:', rawOutput.length, 'bytes');
       outputBuffer += rawOutput;
       // Debug - Raw Gemini stdout
       hasReceivedOutput = true;
@@ -337,6 +340,7 @@ async function spawnGemini(command, options = {}, ws) {
     // Handle stderr
     geminiProcess.stderr.on('data', (data) => {
       const errorMsg = data.toString();
+      console.log('⚠️ Gemini stderr received:', errorMsg);
       // Debug - Raw Gemini stderr
       
       // Filter out deprecation warnings and "Loaded cached credentials" message
@@ -358,7 +362,7 @@ async function spawnGemini(command, options = {}, ws) {
     
     // Handle process completion
     geminiProcess.on('close', async (code) => {
-      // console.log(`Gemini CLI process exited with code ${code}`);
+      console.log(`🏁 Gemini CLI process exited with code ${code}`);
       clearTimeout(timeout);
       
       // Flush any remaining buffered content
@@ -405,7 +409,7 @@ async function spawnGemini(command, options = {}, ws) {
     
     // Handle process errors
     geminiProcess.on('error', (error) => {
-      // console.error('Gemini CLI process error:', error);
+      console.error('❌ Gemini CLI process error:', error);
       
       // Clean up process reference on error
       const finalSessionId = capturedSessionId || sessionId || processKey;

@@ -453,9 +453,9 @@ wss.on('connection', (ws, request) => {
   const pathname = urlObj.pathname;
   
   if (pathname === '/shell') {
-    handleShellConnection(ws);
+    handleShellConnection(ws, request);
   } else if (pathname === '/ws') {
-    handleChatConnection(ws);
+    handleChatConnection(ws, request);
   } else {
     // console.log('❌ Unknown WebSocket path:', pathname);
     ws.close();
@@ -463,7 +463,7 @@ wss.on('connection', (ws, request) => {
 });
 
 // Handle chat WebSocket connections
-function handleChatConnection(ws) {
+function handleChatConnection(ws, request) {
   // console.log('💬 Chat WebSocket connected');
   
   // Add to connected clients for project updates
@@ -474,10 +474,17 @@ function handleChatConnection(ws) {
       const data = JSON.parse(message);
       
       if (data.type === 'gemini-command') {
-        // console.log('💬 User message:', data.command || '[Continue/Resume]');
-        // console.log('📁 Project:', data.options?.projectPath || 'Unknown');
-        // console.log('🔄 Session:', data.options?.sessionId ? 'Resume' : 'New');
-        await spawnGemini(data.command, data.options, ws);
+        console.log(`🚀 [ChatWS] Spawning Gemini: "${data.command}"`);
+        console.log(`📂 [ChatWS] CWD: ${process.cwd()}`);
+        console.log(`👤 [ChatWS] User: ${JSON.stringify(request.user)}`);
+        
+        spawnGemini(data.command, data.options, ws).catch(err => {
+          console.error('❌ [ChatWS] spawnGemini error:', err);
+          ws.send(JSON.stringify({
+            type: 'gemini-error',
+            error: `Agent error: ${err.message}`
+          }));
+        });
       } else if (data.type === 'abort-session') {
         // console.log('🛑 Abort session request:', data.sessionId);
         const success = abortGeminiSession(data.sessionId);
@@ -504,7 +511,7 @@ function handleChatConnection(ws) {
 }
 
 // Handle shell WebSocket connections
-function handleShellConnection(ws) {
+function handleShellConnection(ws, request) {
   // console.log('🐚 Shell client connected');
   let shellProcess = null;
   
