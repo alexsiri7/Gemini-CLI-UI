@@ -20,9 +20,10 @@ router.get('/cli/list', async (req, res) => {
     const { execSync } = await import('child_process');
     
     try {
-      const stdout = execSync('/usr/local/bin/gemini mcp list 2>&1', {
+      const geminiScriptPath = '/usr/local/lib/node_modules/@google/gemini-cli/dist/index.js';
+      const stdout = execSync(`node "${geminiScriptPath}" mcp list 2>&1`, {
         encoding: 'utf8',
-        env: { ...process.env, PATH: '/usr/local/share/npm-global/bin:' + process.env.PATH }
+        env: { ...process.env, PATH: '/usr/local/bin:' + process.env.PATH }
       });
       
       console.log(`✅ Gemini CLI output: "${stdout}"`);
@@ -75,8 +76,9 @@ router.post('/cli/add', async (req, res) => {
       }
     }
     
+    const geminiScriptPath = '/usr/local/lib/node_modules/@google/gemini-cli/dist/index.js';
     const escapedArgs = cliArgs.map(arg => "'" + String(arg).replace(/'/g, "'\\''") + "'");
-    const fullCommand = `"/usr/local/bin/gemini" ${escapedArgs.join(' ')}`;
+    const fullCommand = `node "${geminiScriptPath}" ${escapedArgs.join(' ')}`;
     
     try {
       const stdout = execSync(fullCommand + ' 2>&1', {
@@ -105,8 +107,9 @@ router.delete('/cli/remove/:name', async (req, res) => {
     const { spawn } = await import('child_process');
     
     const cliArgs = ['mcp', 'remove', name];
+    const geminiScriptPath = '/usr/local/lib/node_modules/@google/gemini-cli/dist/index.js';
     const escapedArgs = cliArgs.map(arg => "'" + String(arg).replace(/'/g, "'\\''") + "'");
-    const fullCommand = `"/usr/local/bin/gemini" ${escapedArgs.join(' ')}`;
+    const fullCommand = `node "${geminiScriptPath}" ${escapedArgs.join(' ')}`;
     
     try {
       const stdout = execSync(fullCommand + ' 2>&1', {
@@ -135,8 +138,9 @@ router.get('/cli/get/:name', async (req, res) => {
     const { spawn } = await import('child_process');
     
     const cliArgs = ['mcp', 'get', name];
+    const geminiScriptPath = '/usr/local/lib/node_modules/@google/gemini-cli/dist/index.js';
     const escapedArgs = cliArgs.map(arg => "'" + String(arg).replace(/'/g, "'\\''") + "'");
-    const fullCommand = `"/usr/local/bin/gemini" ${escapedArgs.join(' ')}`;
+    const fullCommand = `node "${geminiScriptPath}" ${escapedArgs.join(' ')}`;
     
     try {
       const stdout = execSync(fullCommand + ' 2>&1', {

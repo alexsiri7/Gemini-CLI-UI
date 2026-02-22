@@ -199,10 +199,11 @@ async function spawnGemini(command, options = {}, ws) {
     const geminiPath = process.env.GEMINI_PATH || '/usr/local/bin/gemini';
     // console.log('Full command:', geminiPath, args.join(' '));
     
-    // Standard spawn without shell is more reliable
-    console.log('🚀 Spawning Gemini process (standard):', geminiPath, JSON.stringify(args));
+    // Use node directly to execute the CLI script to avoid ENOENT issues with symlinks/interpreters
+    const geminiScriptPath = '/usr/local/lib/node_modules/@google/gemini-cli/dist/index.js';
+    console.log('🚀 Spawning Gemini process (node):', 'node', geminiScriptPath, JSON.stringify(args));
     
-    const geminiProcess = spawn(geminiPath, args, {
+    const geminiProcess = spawn('node', [geminiScriptPath, ...args], {
       cwd: workingDir,
       stdio: ['pipe', 'pipe', 'pipe'],
       env: { ...process.env } // Inherit all environment variables
