@@ -196,7 +196,7 @@ async function spawnGemini(command, options = {}, ws) {
     // console.log('Working directory:', workingDir);
     
     // Try to find gemini in PATH first, then fall back to environment variable
-    const geminiPath = process.env.GEMINI_PATH || 'gemini';
+    const geminiPath = process.env.GEMINI_PATH || '/usr/local/bin/gemini';
     // console.log('Full command:', geminiPath, args.join(' '));
     
     const geminiProcess = spawn(geminiPath, args, {
