@@ -67,15 +67,13 @@ function ToolsSettings({ isOpen, onClose }) {
   // Available Gemini models (tested and verified)
   const availableModels = [
     { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash', description: 'Fast and efficient latest model (Recommended)' },
-    { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro', description: 'Most advanced model (Note: May have quota limits)' }
+    { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro', description: 'Most advanced model (Note: May have quota limits)' },
+    { value: 'auto-gemini-3', label: 'Gemini 3.0 (Auto)', description: 'Automatically select the best Gemini 3 model' }
   ];
 
   // MCP API functions
   const fetchMcpServers = async () => {
     try {
-      // MCP endpoints are not implemented yet - skip these calls
-      return;
-      
       const token = localStorage.getItem('auth-token');
       
       // First try to get servers using Gemini CLI
@@ -678,6 +676,49 @@ function ToolsSettings({ isOpen, onClose }) {
                     {availableModels.find(m => m.value === selectedModel)?.description}
                   </div>
                 </div>
+              </div>
+            </div>
+            
+            {/* MCP Servers */}
+            <div className="space-y-4 pt-6 border-t border-gray-200 dark:border-gray-800">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                    <svg className="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-medium text-foreground">
+                    Configured MCP Servers
+                  </h3>
+                </div>
+                <button 
+                  onClick={fetchMcpServers}
+                  className="text-xs text-blue-600 hover:underline"
+                >
+                  Refresh List
+                </button>
+              </div>
+              
+              <div className="grid gap-3">
+                {mcpServers.length === 0 ? (
+                  <div className="text-sm text-gray-500 italic p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-dashed border-gray-300 dark:border-gray-700">
+                    No active MCP servers detected. Ensure they are configured in your gemini settings.
+                  </div>
+                ) : (
+                  mcpServers.map((server) => (
+                    <div key={server.name} className="flex items-center justify-between p-3 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800">
+                      <div className="flex flex-col">
+                        <span className="font-medium text-sm">{server.name}</span>
+                        <span className="text-xs text-gray-500 uppercase tracking-wider">{server.type}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                        <span className="text-xs font-medium text-green-600 dark:text-green-400 uppercase">Active</span>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
             

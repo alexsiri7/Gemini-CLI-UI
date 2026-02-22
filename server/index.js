@@ -164,6 +164,12 @@ const wss = new WebSocketServer({
 app.use(cors());
 app.use(express.json());
 
+// Log all requests
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
+
 // Optional API key validation (if configured)
 app.use('/api', validateApiKey);
 

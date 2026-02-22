@@ -23,35 +23,43 @@ router.get('/status', async (req, res) => {
 router.post('/register', async (req, res) => {
   try {
     const { username, password } = req.body;
+    console.log('📝 Registration attempt for user:', username);
     
     // Validate input
     if (!username || !password) {
+      console.log('❌ Registration failed: Missing username or password');
       return res.status(400).json({ error: 'Username and password are required' });
     }
     
     if (username.length < 3 || password.length < 6) {
+      console.log('❌ Registration failed: Invalid length');
       return res.status(400).json({ error: 'Username must be at least 3 characters, password at least 6 characters' });
     }
     
     // Check if users already exist (only allow one user)
-    const hasUsers = userDb.hasUsers();
+    const hasUsers = await userDb.hasUsers();
+    console.log('Check hasUsers:', hasUsers);
     if (hasUsers) {
+      console.log('❌ Registration failed: User already exists');
       return res.status(403).json({ error: 'User already exists. This is a single-user system.' });
     }
     
     // Hash password
     const saltRounds = 12;
+    console.log('Hashing password...');
     const passwordHash = await bcrypt.hash(password, saltRounds);
     
     // Create user
-    const user = userDb.createUser(username, passwordHash);
+    console.log('Creating user in DB...');
+    const user = await userDb.createUser(username, passwordHash);
     
     // Generate token
     const token = generateToken(user);
     
     // Update last login
-    userDb.updateLastLogin(user.id);
+    await userDb.updateLastLogin(user.id);
     
+    console.log('✅ Registration successful for:', username);
     res.json({
       success: true,
       user: { id: user.id, username: user.username },
@@ -59,7 +67,7 @@ router.post('/register', async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error('❌ Registration error:', error);
     if (error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
       res.status(409).json({ error: 'Username already exists' });
     } else {
@@ -72,6 +80,7 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
+    console.log('🔑 Login attempt for user:', username);
     
     // Validate input
     if (!username || !password) {
@@ -79,14 +88,16 @@ router.post('/login', async (req, res) => {
     }
     
     // Get user from database
-    const user = userDb.getUserByUsername(username);
+    const user = await userDb.getUserByUsername(username);
     if (!user) {
+      console.log('❌ Login failed: User not found');
       return res.status(401).json({ error: 'Invalid username or password' });
     }
     
     // Verify password
     const isValidPassword = await bcrypt.compare(password, user.password_hash);
     if (!isValidPassword) {
+      console.log('❌ Login failed: Invalid password');
       return res.status(401).json({ error: 'Invalid username or password' });
     }
     
@@ -94,8 +105,9 @@ router.post('/login', async (req, res) => {
     const token = generateToken(user);
     
     // Update last login
-    userDb.updateLastLogin(user.id);
+    await userDb.updateLastLogin(user.id);
     
+    console.log('✅ Login successful for:', username);
     res.json({
       success: true,
       user: { id: user.id, username: user.username },
@@ -103,7 +115,7 @@ router.post('/login', async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('❌ Login error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
