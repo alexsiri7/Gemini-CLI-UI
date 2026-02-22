@@ -198,12 +198,12 @@ async function spawnGemini(command, options = {}, ws) {
     // Try to find gemini in PATH first, then fall back to environment variable
     const geminiPath = process.env.GEMINI_PATH || '/usr/local/bin/gemini';
     // console.log('Full command:', geminiPath, args.join(' '));
-    
     // Use node directly to execute the CLI script to avoid ENOENT issues with symlinks/interpreters
     const geminiScriptPath = '/usr/local/lib/node_modules/@google/gemini-cli/dist/index.js';
-    console.log('🚀 Spawning Gemini process (node):', 'node', geminiScriptPath, JSON.stringify(args));
+    const nodePath = '/usr/local/bin/node';
+    console.log('🚀 Spawning Gemini process (node):', nodePath, geminiScriptPath, JSON.stringify(args));
     
-    const geminiProcess = spawn('node', [geminiScriptPath, ...args], {
+    const geminiProcess = spawn(nodePath, [geminiScriptPath, ...args], {
       cwd: workingDir,
       stdio: ['pipe', 'pipe', 'pipe'],
       env: { ...process.env } // Inherit all environment variables

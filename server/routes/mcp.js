@@ -21,7 +21,7 @@ router.get('/cli/list', async (req, res) => {
     
     try {
       const geminiScriptPath = '/usr/local/lib/node_modules/@google/gemini-cli/dist/index.js';
-      const stdout = execSync(`node "${geminiScriptPath}" mcp list 2>&1`, {
+      const stdout = execSync(`/usr/local/bin/node "${geminiScriptPath}" mcp list 2>&1`, {
         encoding: 'utf8',
         env: { ...process.env, PATH: '/usr/local/bin:' + process.env.PATH }
       });
@@ -78,7 +78,7 @@ router.post('/cli/add', async (req, res) => {
     
     const geminiScriptPath = '/usr/local/lib/node_modules/@google/gemini-cli/dist/index.js';
     const escapedArgs = cliArgs.map(arg => "'" + String(arg).replace(/'/g, "'\\''") + "'");
-    const fullCommand = `node "${geminiScriptPath}" ${escapedArgs.join(' ')}`;
+    const fullCommand = `/usr/local/bin/node "${geminiScriptPath}" ${escapedArgs.join(' ')}`;
     
     try {
       const stdout = execSync(fullCommand + ' 2>&1', {
@@ -109,7 +109,7 @@ router.delete('/cli/remove/:name', async (req, res) => {
     const cliArgs = ['mcp', 'remove', name];
     const geminiScriptPath = '/usr/local/lib/node_modules/@google/gemini-cli/dist/index.js';
     const escapedArgs = cliArgs.map(arg => "'" + String(arg).replace(/'/g, "'\\''") + "'");
-    const fullCommand = `node "${geminiScriptPath}" ${escapedArgs.join(' ')}`;
+    const fullCommand = `/usr/local/bin/node "${geminiScriptPath}" ${escapedArgs.join(' ')}`;
     
     try {
       const stdout = execSync(fullCommand + ' 2>&1', {
@@ -140,7 +140,7 @@ router.get('/cli/get/:name', async (req, res) => {
     const cliArgs = ['mcp', 'get', name];
     const geminiScriptPath = '/usr/local/lib/node_modules/@google/gemini-cli/dist/index.js';
     const escapedArgs = cliArgs.map(arg => "'" + String(arg).replace(/'/g, "'\\''") + "'");
-    const fullCommand = `node "${geminiScriptPath}" ${escapedArgs.join(' ')}`;
+    const fullCommand = `/usr/local/bin/node "${geminiScriptPath}" ${escapedArgs.join(' ')}`;
     
     try {
       const stdout = execSync(fullCommand + ' 2>&1', {
