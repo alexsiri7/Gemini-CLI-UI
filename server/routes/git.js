@@ -6,7 +6,21 @@ import { promises as fs } from 'fs';
 import { extractProjectDirectory } from '../projects.js';
 
 const router = express.Router();
-const execAsync = promisify(exec);
+// Promise-based exec
+const execAsync = (command, options = {}) => {
+  return new Promise((resolve, reject) => {
+    exec(command, { 
+      ...options, 
+      env: { ...process.env, ...options.env, PATH: '/usr/bin:/usr/local/bin:' + (process.env.PATH || '') } 
+    }, (error, stdout, stderr) => {
+      if (error) {
+        reject({ error, stdout, stderr });
+      } else {
+        resolve({ stdout, stderr });
+      }
+    });
+  });
+};
 
 // Helper function to get the actual project path from the encoded project name
 async function getActualProjectPath(projectName) {

@@ -539,26 +539,26 @@ function handleShellConnection(ws, request) {
         
         try {
           // Get gemini command from environment or use default
-          const geminiPath = process.env.GEMINI_PATH || 'gemini';
+          const geminiPath = process.env.GEMINI_PATH || '/usr/local/bin/gemini';
           
           // First check if gemini CLI is available
           try {
-            execSync(`which ${geminiPath}`, { stdio: 'ignore' });
+            execSync(`which "${geminiPath}"`, { stdio: 'ignore' });
           } catch (error) {
             // console.error('❌ Gemini CLI not found in PATH or GEMINI_PATH');
             ws.send(JSON.stringify({
               type: 'output',
-              data: `\r\n\x1b[31mError: Gemini CLI not found. Please check:\x1b[0m\r\n\x1b[33m1. Install gemini globally: npm install -g @google/generative-ai-cli\x1b[0m\r\n\x1b[33m2. Or set GEMINI_PATH in .env file\x1b[0m\r\n`
+              data: `\r\n\x1b[31mError: Gemini CLI not found at ${geminiPath}\x1b[0m\r\n\x1b[33m1. Install gemini globally: npm install -g @google/generative-ai-cli\x1b[0m\r\n\x1b[33m2. Or set GEMINI_PATH in .env file\x1b[0m\r\n`
             }));
             return;
           }
           
           // Build shell command that changes to project directory first, then runs gemini
-          let geminiCommand = geminiPath;
+          let geminiCommand = `"${geminiPath}"`;
           
           if (hasSession && sessionId) {
             // Try to resume session, but with fallback to new session if it fails
-            geminiCommand = `${geminiPath} --resume ${sessionId} || ${geminiPath}`;
+            geminiCommand = `"${geminiPath}" --resume ${sessionId} || "${geminiPath}"`;
           }
           
           // Create shell command that cds to the project directory first
@@ -566,7 +566,7 @@ function handleShellConnection(ws, request) {
           
           
           // Start shell using PTY for proper terminal emulation
-          shellProcess = pty.spawn('bash', ['-c', shellCommand], {
+          shellProcess = pty.spawn('/bin/bash', ['-c', shellCommand], {
             name: 'xterm-256color',
             cols: 80,
             rows: 24,
