@@ -475,9 +475,22 @@ function handleChatConnection(ws, request) {
       
       if (data.type === 'gemini-command') {
         console.log(`🚀 [ChatWS] Spawning Gemini: "${data.command}"`);
-        console.log(`📂 [ChatWS] CWD: ${process.cwd()}`);
-        console.log(`👤 [ChatWS] User: ${JSON.stringify(request.user)}`);
         
+        // Path mapping from environment variable
+        if (data.options?.cwd && process.env.PATH_MAPPINGS) {
+          const originalCwd = data.options.cwd;
+          const mappings = process.env.PATH_MAPPINGS.split(',');
+          
+          for (const mapping of mappings) {
+            const [hostPath, containerPath] = mapping.split(':');
+            if (hostPath && containerPath && originalCwd.startsWith(hostPath)) {
+              data.options.cwd = originalCwd.replace(hostPath, containerPath);
+              console.log(`🗺️ [ChatWS] Mapped path: ${originalCwd} -> ${data.options.cwd}`);
+              break;
+            }
+          }
+        }
+
         spawnGemini(data.command, data.options, ws).catch(err => {
           console.error('❌ [ChatWS] spawnGemini error:', err);
           ws.send(JSON.stringify({

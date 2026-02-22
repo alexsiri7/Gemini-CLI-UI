@@ -201,6 +201,17 @@ async function spawnGemini(command, options = {}, ws) {
     // Use node directly to execute the CLI script to avoid ENOENT issues with symlinks/interpreters
     const geminiScriptPath = '/usr/local/lib/node_modules/@google/gemini-cli/dist/index.js';
     const nodePath = '/usr/local/bin/node';
+    
+    // LIVE DIAGNOSTICS
+    console.log('🔍 [DIAG] Current process.execPath:', process.execPath);
+    console.log('🔍 [DIAG] Attempting to spawn:', nodePath);
+    try {
+      const stats = await fs.stat(nodePath);
+      console.log('🔍 [DIAG] nodePath exists. Size:', stats.size, 'Mode:', stats.mode);
+    } catch (e) {
+      console.error('❌ [DIAG] nodePath NOT FOUND via fs.stat:', e.message);
+    }
+    
     console.log('🚀 Spawning Gemini process (node):', nodePath, geminiScriptPath, JSON.stringify(args));
     
     const geminiProcess = spawn(nodePath, [geminiScriptPath, ...args], {
