@@ -68,6 +68,8 @@ function ToolsSettings({ isOpen, onClose }) {
   const availableModels = [
     { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash', description: 'Fast and efficient latest model (Recommended)' },
     { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro', description: 'Most advanced model (Note: May have quota limits)' },
+    { value: 'gemini-3.0-flash-v01', label: 'Gemini 3.0 Flash', description: 'Newest Gemini 3.0 Flash model' },
+    { value: 'gemini-3.0-pro-v01', label: 'Gemini 3.0 Pro', description: 'Newest Gemini 3.0 Pro model' },
     { value: 'auto-gemini-3', label: 'Gemini 3.0 (Auto)', description: 'Automatically select the best Gemini 3 model' }
   ];
 

@@ -215,33 +215,34 @@ router.get('/cli/get/:name', async (req, res) => {
 
 // Helper functions to parse Gemini CLI output
 function parseGeminiListOutput(output) {
-  // Parse the output from 'gemini mcp list' command
-  // Format: "name: command/url" or "name: url (TYPE)"
   const servers = [];
   const lines = output.split('\n').filter(line => line.trim());
   
   for (const line of lines) {
+    // Skip headers and empty lines
+    if (line.includes('Configured MCP servers') || line.includes('Loaded cached credentials')) {
+      continue;
+    }
+
     if (line.includes(':')) {
       const colonIndex = line.indexOf(':');
-      const name = line.substring(0, colonIndex).trim();
+      let name = line.substring(0, colonIndex).trim();
+      
+      // Remove status symbols like ✗ or ✓
+      name = name.replace(/^[✗✓]\s*/, '').trim();
+      
       const rest = line.substring(colonIndex + 1).trim();
       
-      let type = 'stdio'; // default type
+      let type = 'stdio';
+      if (rest.includes('(SSE)') || rest.includes('(sse)')) type = 'sse';
+      else if (rest.includes('(HTTP)') || rest.includes('(http)')) type = 'http';
+      else if (rest.startsWith('http')) type = 'http';
       
-      // Check if it has transport type in parentheses like "(SSE)" or "(HTTP)"
-      const typeMatch = rest.match(/\((\w+)\)\s*$/);
-      if (typeMatch) {
-        type = typeMatch[1].toLowerCase();
-      } else if (rest.startsWith('http://') || rest.startsWith('https://')) {
-        // If it's a URL but no explicit type, assume HTTP
-        type = 'http';
-      }
-      
-      if (name) {
+      if (name && name !== 'Configured MCP servers') {
         servers.push({
           name,
           type,
-          status: 'active'
+          status: line.includes('✓') ? 'active' : 'inactive'
         });
       }
     }

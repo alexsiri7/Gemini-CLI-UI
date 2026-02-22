@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "word-coach-annie": {
+      "command": "docker",
+      "args": [
+        "compose",
+        "exec",
+        "-T",
+        "app",
+        "npx",
+        "tsx",
+        "src/mcp/index.ts",
+        "--cwd",
+        "/home/asiri/claude-playground/word-coach-annie"
+      ]
+    }
+  }
+}
