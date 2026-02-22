@@ -202,7 +202,8 @@ async function spawnGemini(command, options = {}, ws) {
     const geminiProcess = spawn(geminiPath, args, {
       cwd: workingDir,
       stdio: ['pipe', 'pipe', 'pipe'],
-      env: { ...process.env } // Inherit all environment variables
+      env: { ...process.env }, // Inherit all environment variables
+      shell: true
     });
     
     // Attach temp file info to process for cleanup later
