@@ -75,36 +75,20 @@ router.post('/cli/add', async (req, res) => {
       }
     }
     
-    console.log('🔧 Running Gemini CLI command:', 'gemini', cliArgs.join(' '));
+    const escapedArgs = cliArgs.map(arg => "'" + String(arg).replace(/'/g, "'\\''") + "'");
+    const fullCommand = `"/usr/local/bin/gemini" ${escapedArgs.join(' ')}`;
     
-    const process = spawn('/usr/local/bin/gemini', cliArgs, {
-      stdio: ['pipe', 'pipe', 'pipe']
-    });
-    
-    let stdout = '';
-    let stderr = '';
-    
-    process.stdout.on('data', (data) => {
-      stdout += data.toString();
-    });
-    
-    process.stderr.on('data', (data) => {
-      stderr += data.toString();
-    });
-    
-    process.on('close', (code) => {
-      if (code === 0) {
-        res.json({ success: true, output: stdout, message: `MCP server "${name}" added successfully` });
-      } else {
-        console.error('Gemini CLI error:', stderr);
-        res.status(400).json({ error: 'Gemini CLI command failed', details: stderr });
-      }
-    });
-    
-    process.on('error', (error) => {
-      console.error('Error running Gemini CLI:', error);
-      res.status(500).json({ error: 'Failed to run Gemini CLI', details: error.message });
-    });
+    try {
+      const stdout = execSync(fullCommand + ' 2>&1', {
+        encoding: 'utf8',
+        env: { ...process.env, PATH: '/usr/local/bin:' + process.env.PATH }
+      });
+      
+      res.json({ success: true, output: stdout, message: `MCP server "${name}" added successfully` });
+    } catch (cmdError) {
+      console.error('Gemini CLI error:', cmdError.stderr || cmdError.message);
+      res.status(400).json({ error: 'Gemini CLI command failed', details: cmdError.stderr || cmdError.message });
+    }
   } catch (error) {
     console.error('Error adding MCP server via CLI:', error);
     res.status(500).json({ error: 'Failed to add MCP server', details: error.message });
@@ -120,34 +104,21 @@ router.delete('/cli/remove/:name', async (req, res) => {
     
     const { spawn } = await import('child_process');
     
-    const process = spawn('/usr/local/bin/gemini', ['mcp', 'remove', name], {
-      stdio: ['pipe', 'pipe', 'pipe']
-    });
+    const cliArgs = ['mcp', 'remove', name];
+    const escapedArgs = cliArgs.map(arg => "'" + String(arg).replace(/'/g, "'\\''") + "'");
+    const fullCommand = `"/usr/local/bin/gemini" ${escapedArgs.join(' ')}`;
     
-    let stdout = '';
-    let stderr = '';
-    
-    process.stdout.on('data', (data) => {
-      stdout += data.toString();
-    });
-    
-    process.stderr.on('data', (data) => {
-      stderr += data.toString();
-    });
-    
-    process.on('close', (code) => {
-      if (code === 0) {
-        res.json({ success: true, output: stdout, message: `MCP server "${name}" removed successfully` });
-      } else {
-        console.error('Gemini CLI error:', stderr);
-        res.status(400).json({ error: 'Gemini CLI command failed', details: stderr });
-      }
-    });
-    
-    process.on('error', (error) => {
-      console.error('Error running Gemini CLI:', error);
-      res.status(500).json({ error: 'Failed to run Gemini CLI', details: error.message });
-    });
+    try {
+      const stdout = execSync(fullCommand + ' 2>&1', {
+        encoding: 'utf8',
+        env: { ...process.env, PATH: '/usr/local/bin:' + process.env.PATH }
+      });
+      
+      res.json({ success: true, output: stdout, message: `MCP server "${name}" removed successfully` });
+    } catch (cmdError) {
+      console.error('Gemini CLI error:', cmdError.stderr || cmdError.message);
+      res.status(400).json({ error: 'Gemini CLI command failed', details: cmdError.stderr || cmdError.message });
+    }
   } catch (error) {
     console.error('Error removing MCP server via CLI:', error);
     res.status(500).json({ error: 'Failed to remove MCP server', details: error.message });
@@ -163,34 +134,21 @@ router.get('/cli/get/:name', async (req, res) => {
     
     const { spawn } = await import('child_process');
     
-    const process = spawn('/usr/local/bin/gemini', ['mcp', 'get', name], {
-      stdio: ['pipe', 'pipe', 'pipe']
-    });
+    const cliArgs = ['mcp', 'get', name];
+    const escapedArgs = cliArgs.map(arg => "'" + String(arg).replace(/'/g, "'\\''") + "'");
+    const fullCommand = `"/usr/local/bin/gemini" ${escapedArgs.join(' ')}`;
     
-    let stdout = '';
-    let stderr = '';
-    
-    process.stdout.on('data', (data) => {
-      stdout += data.toString();
-    });
-    
-    process.stderr.on('data', (data) => {
-      stderr += data.toString();
-    });
-    
-    process.on('close', (code) => {
-      if (code === 0) {
-        res.json({ success: true, output: stdout, server: parseGeminiGetOutput(stdout) });
-      } else {
-        console.error('Gemini CLI error:', stderr);
-        res.status(404).json({ error: 'Gemini CLI command failed', details: stderr });
-      }
-    });
-    
-    process.on('error', (error) => {
-      console.error('Error running Gemini CLI:', error);
-      res.status(500).json({ error: 'Failed to run Gemini CLI', details: error.message });
-    });
+    try {
+      const stdout = execSync(fullCommand + ' 2>&1', {
+        encoding: 'utf8',
+        env: { ...process.env, PATH: '/usr/local/bin:' + process.env.PATH }
+      });
+      
+      res.json({ success: true, output: stdout, server: parseGeminiGetOutput(stdout) });
+    } catch (cmdError) {
+      console.error('Gemini CLI error:', cmdError.stderr || cmdError.message);
+      res.status(404).json({ error: 'Gemini CLI command failed', details: cmdError.stderr || cmdError.message });
+    }
   } catch (error) {
     console.error('Error getting MCP server details via CLI:', error);
     res.status(500).json({ error: 'Failed to get MCP server details', details: error.message });
