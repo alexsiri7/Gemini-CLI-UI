@@ -104,6 +104,20 @@ class SessionManager {
       timestamp: msg.timestamp.toISOString()
     }));
   }
+
+  buildConversationContext(sessionId) {
+    const session = this.sessions.get(sessionId);
+    if (!session || session.messages.length === 0) return '';
+    
+    // Format messages as context
+    // Skip the very last message if it's the current user prompt (though usually this is called before adding)
+    return session.messages
+      .map(msg => {
+        const role = msg.role === 'user' ? 'User' : 'Assistant';
+        return `${role}: ${msg.content}`;
+      })
+      .join('\n\n') + '\n\nAssistant: ';
+  }
 }
 
 const sessionManager = new SessionManager();
